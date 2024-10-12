@@ -3,6 +3,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const hpp = require("hpp");
+const cookieParser = require("cookie-parser");
 const app = express();
 
 const indexRoutes = require("./router");
@@ -10,6 +11,7 @@ const errorHandler = require("./middleware/errorHandler");
 
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.use(morgan("dev"));
 app.use(cors());
