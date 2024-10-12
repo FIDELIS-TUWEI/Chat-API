@@ -36,6 +36,7 @@ module.exports = (sequelize) => {
             defaultValue: false
         }
     }, {
+        tableName: 'User', 
         timestamps: true,
         createdAt: 'created_at',
         updatedAt: 'updated_at',
@@ -43,7 +44,7 @@ module.exports = (sequelize) => {
 
     User.associate = (models) => {
         User.hasMany(models.Message, { foreignKey: 'sender_id' });
-        User.hasMany(models.FriendShip, { foreignKey: 'user_id' });
+        User.hasMany(models.Friendship, { foreignKey: 'user_id' });
         User.hasMany(models.GroupMessage, { foreignKey: 'sender_id' });
         User.hasMany(models.Notification, { foreignKey: 'user_id' });
     };
