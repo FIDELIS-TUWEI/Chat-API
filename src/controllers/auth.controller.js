@@ -1,9 +1,9 @@
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const asyncHandler = require("express-async-handler");
 const { User } = require("../../models/user");
 const { validationResult } = require("express-validator");
 const CustomError = require("../utils/CustomError");
+const { generateTokens, storeRefreshToken, setCookies } = require("../utils/generateTokens");
 
 exports.signup = asyncHandler (async (req, res, next) => {
     const errors = validationResult(req);
@@ -28,6 +28,11 @@ exports.signup = asyncHandler (async (req, res, next) => {
             profile_picture,
             password: passwordHash
         });
+
+        const { accessToken, refreshToken } = generateTokens(newUser.user_id);
+        await storeRefreshToken(newUser.user_id, refreshToken);
+
+        setCookies(res, accessToken, refreshToken);
 
         res.status(201).json({
             status: 'success',
