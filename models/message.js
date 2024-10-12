@@ -30,8 +30,8 @@ module.exports = (sequelize) => {
     });
 
     Message.associate = (models) => {
-        Message.belonsTo(models.User, { foreignKey: 'sender_id' });
-        Message.belonsTo(models.User, { foreignKey: 'recipient_id' });
+        Message.belongsTo(models.User, { foreignKey: 'sender_id' });
+        Message.belongsTo(models.User, { foreignKey: 'recipient_id' });
     };
 
     return Message;
