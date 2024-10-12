@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   postgres:
-    image: postgres:14
+    image: postgres:14-alpine
     restart: always
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
@@ -31,7 +31,7 @@ services:
       timeout: 5s
       retries: 5
 
-  express-app:  # This is your Express server service
+  express-chat-api:  # This is your Express server service
     build: .  # This assumes your Dockerfile is in the same directory as this docker-compose file
     ports:
       - "4001:4001"  # Mapping host port 4001 to container port 4001
