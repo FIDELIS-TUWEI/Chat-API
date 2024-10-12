@@ -40,6 +40,9 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}  # Pass Postgres environment variables
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
     depends_on:
       - postgres
       - redis  # Ensure the app starts after Postgres and Redis are up
