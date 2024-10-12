@@ -12,7 +12,7 @@ exports.signup = asyncHandler (async (req, res, next) => {
     };
 
     try {
-        const { username, email, password, profile_picture } = req.body;
+        const { username, email, password } = req.body;
 
         const userExists = await User.findOne({ where: { email } });
         if (userExists) {
@@ -25,7 +25,6 @@ exports.signup = asyncHandler (async (req, res, next) => {
         const newUser = await User.Create({
             username,
             email,
-            profile_picture,
             password: passwordHash
         });
 
@@ -40,7 +39,6 @@ exports.signup = asyncHandler (async (req, res, next) => {
                 id: newUser.user_id,
                 username: newUser.username,
                 email: newUser.email,
-                profile_picture: newUser.profile_picture
             }
         });
 
