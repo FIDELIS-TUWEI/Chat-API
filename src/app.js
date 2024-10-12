@@ -6,7 +6,7 @@ const hpp = require("hpp");
 const app = express();
 
 const indexRoutes = require("./router");
-
+const errorHandler = require("./middleware/errorHandler");
 
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -20,11 +20,10 @@ app.use(helmet.frameguard({ action: 'deny' })); // prevent clickjacking
 app.use(helmet.noSniff()); // MIME Type sniffing protection
 app.use(helmet.referrerPolicy({ policy: 'no-referrer' })); // privacy protection
 
-
 app.disable("x-powered-by");
-
 
 app.use("/api/v1", indexRoutes);
 
+app.use(errorHandler);
 
 module.exports = app;
