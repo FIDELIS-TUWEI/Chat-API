@@ -1,9 +1,9 @@
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const asyncHandler = require("express-async-handler");
-const db = require("../../models");
 const { validationResult } = require("express-validator");
 const CustomError = require("../utils/CustomError");
 const { generateTokens, storeRefreshToken, setCookies } = require("../utils/generateTokens");
+const { query } = require("../../database/db");
 
 exports.signup = asyncHandler (async (req, res, next) => {
     const errors = validationResult(req);
@@ -14,19 +14,27 @@ exports.signup = asyncHandler (async (req, res, next) => {
     try {
         const { username, email, password } = req.body;
 
-        const userExists = await db.User.findOne({ where: { email } });
-        if (userExists) {
+        const userExistsQuery = `
+                SELECT * FROM "User" WHERE email = $1;
+            `;
+        
+        const existingUser = await query(userExistsQuery, [email]);
+
+        if (existingUser.rows.length > 0) {
             return next(new CustomError("User already Exists", 400))
         };
 
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
 
-        const newUser = await db.User.create({
-            username,
-            email,
-            password: passwordHash
-        });
+        const createUserQuery = `
+            INSERT INTO "User" (username, email, password, created_at, updated_at)
+            VALUES ($1, $2, $3, NOW(), NOW())
+            RETURNING user_id, username, email
+        `;
+
+        const newUserResult = await query(createUserQuery, [username, email, passwordHash]);
+        const newUser = newUserResult.rows[0];
 
         const { accessToken, refreshToken } = generateTokens(newUser.user_id);
         await storeRefreshToken(newUser.user_id, refreshToken);
@@ -44,7 +52,7 @@ exports.signup = asyncHandler (async (req, res, next) => {
 
     } catch (error) {
         console.error("Error occured on signup controller:", error);
-        next(error);
+        return res.status(500).json({ status: 'error', message: error.message || 'Internal server error' })
     }
 });
 
