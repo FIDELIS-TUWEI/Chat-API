@@ -9,17 +9,21 @@ const pool = new Pool({
     port: config.POSTGRES_PORT || 5432,
 });
 
-const testConnection = async () => {
-    try {
-        const client = await pool.connect();
-        console.log('Successfully connected to the PostgreSQL database');
-        client.release();
-        return true;
-    } catch (err) {
-        console.error('Error connecting to the database', err);
-        return false;
+const testConnection = async (retries = 5) => {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const client = await pool.connect();
+            console.log('Successfully connected to the PostgreSQL database');
+            client.release();
+            return true;
+        } catch (err) {
+            console.error('Error connecting to the database', err);
+            await new Promise(res => setTimeout(res, 5000)); // wait for 5 seconds before retrying
+        }
     }
+    return false;
 };
+
 
 const checkTablesExist = async () => {
     const client = await pool.connect();
