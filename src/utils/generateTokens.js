@@ -19,14 +19,14 @@ const storeRefreshToken = async (userId, refreshToken) => {
 };
 
 const setCookies = (res, accessToken, refreshToken) => {
-    res.cookie("ca/", accessToken, {
+    res.cookie("accessToken", accessToken, {
         httpOnly: true, 
         secure: config.NODE_ENV === "production",
         sameSite: 'strict', 
         maxAge: 15 * 60 * 1000 
     });
 
-    res.cookie("ca/*", refreshToken, {
+    res.cookie("refreshToken", refreshToken, {
         httpOnly: true, 
         secure: config.NODE_ENV === "production",
         sameSite: 'strict',
