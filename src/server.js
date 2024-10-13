@@ -12,18 +12,25 @@ const io = new Server(server, {
 });
 
 // Test database connection before starting the server
-sequelize.authenticate()
-    .then(() => {
+const startServer = async () => {
+    try {
+        await sequelize.authenticate();
         console.log('Database connection established successfully.');
 
+        // Sync the database models
+        await sequelize.sync(); // Sync models to create tables if not exist
+
         // Start the server only if the database connection is successful
-        app.listen(config.PORT, () => {
+        server.listen(config.PORT, () => {
             console.log(`Server running on port: ${config.PORT}`);
         });
-    })
-    .catch(err => {
+    } catch (err) {
         console.error('Unable to connect to the database:', err);
-    });
+        process.exit(1); // Exit the process if the DB connection fails
+    }
+};
+
+startServer();
 
 io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
