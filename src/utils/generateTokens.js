@@ -26,7 +26,7 @@ const setCookies = (res, accessToken, refreshToken) => {
         maxAge: 15 * 60 * 1000 // 15 minutes
     });
 
-    res.cooke("ca/*", refreshToken, {
+    res.cookie("ca/*", refreshToken, {
         httpOnly: true, // prevent XSS attacks
         secure: config.NODE_ENV === "production",
         sameSite: 'strict', // prevents CSRF attack
