@@ -1,8 +1,8 @@
 const app = require("./app");
 const http = require("http");
 const { Server } = require("socket.io");
-const sequelize = require("./config/database");
 const config = require("./utils/config");
+const { testConnection, createTables, checkTablesExist } = require("../database/db");
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -11,19 +11,32 @@ const io = new Server(server, {
     },
 });
 
-// Test database connection before starting the server
-sequelize.authenticate()
-    .then(() => {
-        console.log('Database connection established successfully.');
+const startServer = async () => {
+    try {
+        const connected = await testConnection();
+        if (!connected) {
+            console.error('Failed to connect to the database. Exiting...');
+            process.exit(1);
+        }
+        
+        const tablesExist = await checkTablesExist();
+        if (!tablesExist) {
+            await createTables();
+            console.log('Database tables created successfully');
+        } else {
+            console.log('Database tables already exist, skipping creation...');
+        }
 
-        // Start the server only if the database connection is successful
-        app.listen(config.PORT, () => {
+        server.listen(config.PORT, () => {
             console.log(`Server running on port: ${config.PORT}`);
         });
-    })
-    .catch(err => {
-        console.error('Unable to connect to the database:', err);
-    });
+    } catch (err) {
+        console.error('Error starting server:', err);
+        process.exit(1);
+    }
+};
+
+startServer();
 
 io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
