@@ -117,13 +117,57 @@ exports.logout = asyncHandler (async (req, res) => {
             await client.del(`refresh_token: ${decoded.userId}`);
         };
 
-        res.clearCookie('ca/');
-        res.clearCookie('ca/*');
+        res.clearCookie('accessToken');
+        res.clearCookie('refreshToken');
 
         res.status(200).json({ status: 'success', message: "Logged out successfully" });
-        
+
     } catch (error) {
         console.error("Error occured in logout controller:", error);
         return res.status(500).json({ status: 'error', message: error.message || 'Internal server error' })
+    }
+});
+
+exports.refreshToken = asyncHandler (async (req, res) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+
+        if (!refreshToken) {
+            return res.status(401).json({ status: "error", message: "No refresh token provided" })
+        };
+
+        const decoded = jwt.verify(refreshToken, config.REFRESH_TOKEN_SECRET);
+        const storedToken = await client.get(`refresh_token: ${decoded.userId}`);
+
+        if (storedToken !== refreshToken) {
+            return res.status(401).json({ status: 'error', messaged: "Invalid refresh token" });
+        };
+
+        const accessToken = jwt.sign({ userId: decoded.userId }, config.ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
+
+        res.cookie("accessToken", accessToken, {
+            httpOnly: true, 
+            secure: config.NODE_ENV === "production",
+            sameSite: 'strict', 
+            maxAge: 15 * 60 * 1000 
+        });
+    
+        res.status(200).json({
+            status: 'success',
+            message: "Token refreshed successfully"
+        });
+
+    } catch (error) {
+        console.error("Error occured in refreshToken controller:", error);
+        return res.status(500).json({ status: 'error', message: error.message || 'Internal server error' });
+    }
+});
+
+exports.getProfile = asyncHandler (async (req, res) => {
+    try {
+        res.json(req.user);
+    } catch (error) {
+        console.error("Error occured in getProfile controller:", error);
+        return res.status(500).json({ status: 'error', message: error.message || 'Internal server error' });
     }
 });
