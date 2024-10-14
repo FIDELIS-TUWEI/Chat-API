@@ -171,3 +171,80 @@ exports.getProfile = asyncHandler (async (req, res) => {
         return res.status(500).json({ status: 'error', message: error.message || 'Internal server error' });
     }
 });
+
+exports.updateProfile = asyncHandler (async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    };
+
+    const userId = req.user.user_id;
+    const { username, email, password } = req.body;
+
+    try {
+        if (email) {
+            const userQuery = `
+                SELECT * FROM "User" WHERE email = $1 AND user_id != $2;
+            `;
+
+            const existingUser = await query(userQuery, [email, userId]);
+            if (existingUser.rows.length > 0) {
+                return next(new CustomError("Email is already in use.", 400));
+            }
+        };
+
+        let passwordHash = null;
+        if (password) {
+            const salt = await bcrypt.genSalt(10)
+            passwordHash = await bcrypt.hash(password, salt);
+        };
+
+        let updateFields = [];
+        let updateValues = [];
+        let fieldCount = 1;
+
+        if (username) {
+            updateFields.push(`username = $${fieldCount}`);
+            updateValues.push(username);
+            fieldCount++;
+        }
+
+        if (email) {
+            updateFields.push(`email = $${fieldCount}`);
+            updateValues.push(email);
+            fieldCount++;
+        };
+
+        if (passwordHash) {
+            updateFields.push(`password = $${fieldCount}`);
+            updateValues.push(passwordHash);
+            fieldCount++;
+        };
+
+        updateValues.push(userId);
+
+        const updateUserQuery = `
+            UPDATE "User"
+            SET ${updateFields.join(", ")}, updated_at = NOW()
+            WHERE user_id = $${fieldCount}
+            RETURNING user_id, username, email, updated_at;
+        `;
+
+        const updatedUserResult = await query(updateUserQuery, updateValues);
+        const updatedUser = updatedUserResult.rows[0];
+
+        res.status(200).json({
+            status: "success",
+            message: "User profile updated successfully",
+            data: {
+                id: updatedUser.user_id,
+                username: updatedUser.username,
+                email: updatedUser.email,
+                updatedAt: updatedUser.updated_at
+            }
+        });
+    } catch (error) {
+        console.error("Error occured while updating profile in updateProfile controller:", error);
+        return res.status(500).json({ status: 'error', message: error.message || 'Internal server error' });
+    }
+});
