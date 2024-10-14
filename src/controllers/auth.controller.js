@@ -66,18 +66,18 @@ exports.login = asyncHandler (async (req, res, next) => {
         return res.status(400).json({ errors: errors.array() });
     };
 
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!username || !password) {
-        return res.status(400).json({ status: 'error', message: "Username or Password is required" });
+    if (!email || !password) {
+        return res.status(400).json({ status: 'error', message: "Email or Password is required" });
     }
 
     try {
         const userQuery = `
-            SELECT * FROM "User" WHERE username = $1;
+            SELECT * FROM "User" WHERE email = $1;
         `;
 
-        const userResult = await query(userQuery, [username]);
+        const userResult = await query(userQuery, [email]);
         if (userResult.rows.length === 0) {
             return next(new CustomError("Invalid Credentials", 401));
         };
