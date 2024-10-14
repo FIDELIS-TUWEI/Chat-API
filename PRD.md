@@ -11,9 +11,9 @@ The "Chat API" project aims to develop a comprehensive real-time messaging API t
 
 ## 3. Functional Requirements
 ### User Management
-- **Sign Up**: Users create an account with a username, email, and password.
-- **Login**: Users log in using email and password, with support for MFA.
-- **Profile Management**: Users can update their profile.
+- **Sign Up**: Users create an account with a username, email, and password. ✅
+- **Login**: Users log in using email and password, with support for MFA. ✅
+- **Profile Management**: Users can update their profile. ✅
 
 ### Friend Management
 - **Add Friends**: Users can send friend requests.
