@@ -1,19 +1,19 @@
 # Chat API Technical Specifications
 
 ## User Management
-1. **Sign Up**
+1. **Sign Up** ✅
    - API Endpoint: POST /signup
    - Input: username (string), email (string), password (string)
    - Output: 201 Created, with user details
    - Constraints: Password must be at least 8 characters, email must be valid and unique.
 
-2. **Login**
+2. **Login** ✅
    - API Endpoint: POST /login
    - Input: email (string), password (string)
    - Output: 200 OK, with JWT token
    - Constraints: Account must be verified before login.
 
-3. **Profile Management**
+3. **Profile Management** ✅
    - API Endpoint: GET /profile, PUT /profile
    - Input (PUT): username (string), email (string), profile picture (optional)
    - Output: 200 OK, with updated user data.
