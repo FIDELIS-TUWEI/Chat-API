@@ -62,6 +62,7 @@ const createTables = async () => {
             profile_picture VARCHAR(255),
             is_verified BOOLEAN DEFAULT FALSE,
             mfa_enabled BOOLEAN DEFAULT FALSE,
+            mfa_secret VARCHAR(255),
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );
